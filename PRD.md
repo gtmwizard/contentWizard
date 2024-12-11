@@ -1,7 +1,7 @@
-# Content Wizard - Product Requirements Document
+# WordSchmit - Product Requirements Document
 
 ## Overview
-Content Wizard is an AI-powered content creation platform that helps businesses generate and manage content across multiple platforms while maintaining a consistent brand voice.
+WordSchmit is an AI-powered content creation platform that helps businesses generate and manage content across multiple platforms while maintaining a consistent brand voice.
 
 ## Completed Features ✅
 
@@ -32,11 +32,11 @@ Content Wizard is an AI-powered content creation platform that helps businesses 
 - Basic content management (CRUD operations)
 
 ### Technical Infrastructure
-- React frontend with Material-UI
+- React frontend with ShadcnUI
 - Express backend with TypeScript
 - PostgreSQL database with Prisma ORM
 - Docker containerization for database
-- LangChain integration for AI operations
+- OpenAI integration for AI operations
 - Secure API key storage
 - Basic error handling and validation
 
@@ -83,7 +83,7 @@ Content Wizard is an AI-powered content creation platform that helps businesses 
 ### User Experience
 - [ ] Improved content preview
 - [ ] Mobile responsive design
-- [ ] Dark mode support
+- [x] Dark mode support
 - [ ] Keyboard shortcuts
 - [ ] Bulk operations
 - [ ] Advanced search and filtering

@@ -1,4 +1,4 @@
-# Content Wizard - Technical Specification Document
+# WordSchmit - Technical Specification Document
 
 ## System Architecture
 
@@ -9,8 +9,8 @@ The system will follow a microservices architecture with the following main comp
 - **Technology Stack**:
   - React.js for web application
   - TypeScript for type safety
-  - Material-UI for component library
-  - Redux for state management
+  - ShadcnUI for component library
+  - Context API for state management
 
 #### Backend Layer
 - **Core Services**:

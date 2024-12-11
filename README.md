@@ -1,6 +1,6 @@
-# Content Wizard 🪄
+# WordSchmit 🪄
 
-Content Wizard is an AI-powered content creation platform that helps businesses generate personalized content across multiple platforms. It uses advanced language models to create content that matches your brand voice and business context.
+WordSchmit is an AI-powered content creation platform that helps businesses generate personalized content across multiple platforms. It uses advanced language models to create content that matches your brand voice and business context.
 
 ## Features ✨
 
@@ -16,7 +16,7 @@ Content Wizard is an AI-powered content creation platform that helps businesses 
 ### Frontend
 - React 18
 - TypeScript
-- Material-UI (MUI)
+- ShadcnUI
 - React Router
 - Context API for state management
 
@@ -26,7 +26,6 @@ Content Wizard is an AI-powered content creation platform that helps businesses 
 - TypeScript
 - Prisma (ORM)
 - PostgreSQL
-- LangChain
 - OpenAI GPT-4
 - JWT Authentication
 
@@ -47,7 +46,7 @@ Content Wizard is an AI-powered content creation platform that helps businesses 
 1. Clone the repository:
 ```bash
 git clone [repository-url]
-cd content-wizard
+cd wordschmit
 ```
 
 2. Install dependencies:
@@ -68,7 +67,7 @@ cp .env.example .env
 ```
 Edit `.env` file with your configuration:
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/content_wizard"
+DATABASE_URL="postgresql://user:password@localhost:5432/wordschmit"
 JWT_SECRET="your-secret-key"
 CORS_ORIGIN="http://localhost:5173"
 ```
@@ -94,19 +93,10 @@ npm run dev
 npm run dev
 ```
 
-## Usage 💡
-
-1. Register an account and complete the onboarding process
-2. Add your OpenAI API key in the Settings page
-3. Navigate to Create Content to start generating content
-4. Choose your content type, topic, and preferences
-5. Generate and edit content as needed
-6. View and manage your content in the Dashboard
-
 ## Project Structure 📁
 
 ```
-content-wizard/
+wordschmit/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/

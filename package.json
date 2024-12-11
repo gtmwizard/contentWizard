@@ -1,6 +1,9 @@
 {
-  "dependencies": {
-    "@radix-ui/react-checkbox": "^1.1.2",
-    "@radix-ui/react-label": "^2.1.0"
+  "name": "wordschmit",
+  "version": "1.0.0",
+  "description": "AI-powered content creation platform",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix content-wizard/frontend & npm run dev --prefix content-wizard/backend"
   }
 }
