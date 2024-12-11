@@ -1,15 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Container,
-  Paper,
-  Typography,
-  Stepper,
-  Step,
-  StepLabel,
-} from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
+import { Card, CardContent } from "@/components/ui/card"
+import { Stepper } from "@/components/ui/stepper"
 import BusinessDetails from '../components/onboarding/BusinessDetails';
 import ContentPreferences from '../components/onboarding/ContentPreferences';
 import VoiceAnalysis from '../components/onboarding/VoiceAnalysis';
@@ -36,13 +29,13 @@ interface ContentPreferencesData {
 interface VoiceProfileData {
   writingSamples: Array<{
     text: string;
-    type: string;
+    type: "blog" | "social" | "custom";
   }>;
   influencers: string[];
   writingStyle: {
-    formality: string;
-    complexity: string;
-    emotion: string;
+    formality: "casual" | "neutral" | "formal";
+    complexity: "simple" | "moderate" | "complex";
+    emotion: "neutral" | "passionate" | "empathetic";
   };
 }
 
@@ -52,14 +45,13 @@ interface OnboardingData {
   voiceProfile: VoiceProfileData;
 }
 
-const steps = ['Business Details', 'Content Preferences', 'Voice Analysis', 'Summary'];
-
-const SAMPLE_DATA: OnboardingData = {
+// Test data for development
+const TEST_DATA: OnboardingData = {
   businessDetails: {
     businessName: "TechFlow Solutions",
     industry: "Software Development",
-    targetAudience: "Small to medium-sized businesses looking to digitize their operations",
-    description: "We create intuitive software solutions that help businesses streamline their workflows and improve productivity. Our focus is on delivering user-friendly applications that solve real business problems.",
+    targetAudience: "Small to medium-sized businesses looking to automate their workflows",
+    description: "We provide innovative software solutions that help businesses streamline their operations and boost productivity through intelligent automation and user-friendly interfaces.",
   },
   contentPreferences: {
     contentTypes: {
@@ -69,173 +61,157 @@ const SAMPLE_DATA: OnboardingData = {
     },
     topics: [
       "Digital Transformation",
+      "Workflow Automation",
       "Software Development",
-      "Business Automation",
       "Tech Innovation",
-      "Project Management",
+      "Business Efficiency",
+      "AI and Machine Learning"
     ],
     tones: [
       "Professional",
       "Informative",
       "Engaging",
+      "Authoritative"
     ],
     goals: [
       "Establish thought leadership",
       "Share industry insights",
       "Showcase expertise",
-      "Drive engagement",
+      "Generate leads",
+      "Build brand awareness"
     ],
   },
   voiceProfile: {
     writingSamples: [
       {
-        text: "Digital transformation is not just about adopting new technologies - it is about reimagining how your business operates in the digital age. At TechFlow, we believe that successful transformation starts with understanding your unique business needs and challenges.",
-        type: "blog",
+        text: "Discover how our latest workflow automation solution helped a growing e-commerce business reduce their order processing time by 75%. Through intelligent process mapping and custom integrations, we transformed their manual operations into a streamlined digital workflow.",
+        type: "blog"
       },
       {
-        text: "Excited to announce our latest case study! See how we helped ABC Corp reduce their processing time by 75% through smart automation. #TechInnovation #BusinessEfficiency",
-        type: "social",
+        text: "🚀 Excited to announce our new AI-powered automation suite! Helping businesses work smarter, not harder. #TechInnovation #Automation",
+        type: "social"
       },
+      {
+        text: "Looking to scale your business operations without scaling your team size? Our latest case study shows how intelligent automation can help you achieve more with your existing resources. #ProductivityHacks #BusinessGrowth",
+        type: "custom"
+      }
     ],
     influencers: [
       "Satya Nadella",
       "Marc Benioff",
-      "Jeff Weiner",
+      "Simon Sinek",
+      "Gary Vaynerchuk"
     ],
     writingStyle: {
-      formality: "neutral",
+      formality: "formal",
       complexity: "moderate",
-      emotion: "passionate",
+      emotion: "passionate"
     },
   },
 };
 
-export default function Onboarding() {
-  const navigate = useNavigate();
-  const { token, user, checkOnboardingStatus } = useAuth();
-  const [activeStep, setActiveStep] = useState(0);
-  const [onboardingData, setOnboardingData] = useState<OnboardingData>(SAMPLE_DATA);
+const steps = [
+  "Business Details",
+  "Content Preferences",
+  "Voice Analysis",
+  "Review & Complete"
+];
 
-  const handleNext = (stepData: Partial<OnboardingData>) => {
+export default function Onboarding() {
+  const [activeStep, setActiveStep] = useState(0);
+  const [onboardingData, setOnboardingData] = useState<OnboardingData | null>(TEST_DATA); // Pre-filled with test data
+  const { updateProfile } = useAuth();
+  const navigate = useNavigate();
+
+  const handleNext = (data: Partial<OnboardingData>) => {
     const updatedData = {
       ...onboardingData,
-      ...stepData,
-    };
+      ...data,
+    } as OnboardingData;
     setOnboardingData(updatedData);
-    setActiveStep((prevStep) => prevStep + 1);
+    setActiveStep((prev) => prev + 1);
   };
 
   const handleBack = () => {
-    setActiveStep((prevStep) => prevStep - 1);
+    setActiveStep((prev) => prev - 1);
   };
 
-  const handleComplete = async (finalData: Partial<OnboardingData>) => {
+  const handleComplete = async (data: OnboardingData) => {
     try {
-      const updatedData = {
-        ...onboardingData,
-        ...finalData,
-      };
-      setOnboardingData(updatedData);
-
-      // Update profile with complete onboarding data
-      const response = await fetch('http://localhost:3001/api/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          businessDetails: updatedData.businessDetails,
-          contentPrefs: updatedData.contentPreferences,
-          voiceProfile: updatedData.voiceProfile,
-        }),
+      await updateProfile({ 
+        hasCompletedOnboarding: true,
+        metadata: data,
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to save profile');
-      }
-
-      // Check onboarding status after profile update
-      await checkOnboardingStatus();
-      
-      // Navigate to dashboard after successful profile update
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error('Failed to complete onboarding:', error);
     }
   };
 
   return (
-    <Box 
-      sx={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        py: 4,
-        backgroundColor: '#f5f5f5'
-      }}
-    >
-      <Container maxWidth="md">
-        <Paper 
-          elevation={3}
-          sx={{ 
-            p: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
-          }}
-        >
-          <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Welcome to Content Wizard
-          </Typography>
-          <Stepper 
-            activeStep={activeStep} 
-            sx={{ 
-              mt: 3, 
-              mb: 5,
-              width: '100%',
-              maxWidth: 600
-            }}
-          >
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
+    <div className="min-h-screen bg-background flex flex-col items-center p-4 md:p-8">
+      <Card className="w-full max-w-4xl">
+        <CardContent className="pt-6">
+          <Stepper
+            steps={steps}
+            activeStep={activeStep}
+            className="mb-12"
+          />
           
-          <Box sx={{ width: '100%', maxWidth: 600 }}>
-            {activeStep === 0 && (
-              <BusinessDetails 
-                onNext={(data: BusinessDetailsData) => handleNext({ businessDetails: data })}
-                initialData={onboardingData.businessDetails}
-              />
-            )}
-            {activeStep === 1 && (
-              <ContentPreferences 
-                onNext={(data: ContentPreferencesData) => handleNext({ contentPreferences: data })}
-                onBack={handleBack}
-                initialData={onboardingData.contentPreferences}
-              />
-            )}
-            {activeStep === 2 && (
-              <VoiceAnalysis
-                onNext={(data: VoiceProfileData) => handleNext({ voiceProfile: data })}
-                onBack={handleBack}
-                initialData={onboardingData.voiceProfile}
-              />
-            )}
-            {activeStep === 3 && onboardingData && (
-              <ProfileSummary
-                data={onboardingData}
-                onBack={handleBack}
-                onComplete={handleComplete}
-              />
-            )}
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
+          {activeStep === 0 && (
+            <BusinessDetails
+              onNext={(data) => handleNext({ businessDetails: data })}
+              initialData={onboardingData?.businessDetails || {
+                businessName: '',
+                industry: '',
+                targetAudience: '',
+                description: '',
+              }}
+            />
+          )}
+
+          {activeStep === 1 && onboardingData && (
+            <ContentPreferences
+              onNext={(data) => handleNext({ contentPreferences: data })}
+              onBack={handleBack}
+              initialData={onboardingData?.contentPreferences || {
+                contentTypes: {
+                  blog: false,
+                  linkedin: false,
+                  twitter: false,
+                },
+                topics: [],
+                tones: [],
+                goals: [],
+              }}
+            />
+          )}
+
+          {activeStep === 2 && onboardingData && (
+            <VoiceAnalysis
+              onNext={(data) => handleNext({ voiceProfile: data })}
+              onBack={handleBack}
+              initialData={onboardingData?.voiceProfile || {
+                writingSamples: [],
+                influencers: [],
+                writingStyle: {
+                  formality: 'neutral',
+                  complexity: 'moderate',
+                  emotion: 'neutral',
+                },
+              }}
+            />
+          )}
+
+          {activeStep === 3 && onboardingData && (
+            <ProfileSummary
+              data={onboardingData}
+              onBack={handleBack}
+              onComplete={handleComplete}
+            />
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 } 

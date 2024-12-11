@@ -1,23 +1,12 @@
 import { useState, useRef } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  TextField,
-  Paper,
-  Chip,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
-  IconButton,
-  Alert,
-  Stack,
-  Divider,
-} from '@mui/material';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import DeleteIcon from '@mui/icons-material/Delete';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { SelectEnhanced } from "@/components/ui/select-enhanced"
+import { Textarea } from "@/components/ui/textarea"
+import { Separator } from "@/components/ui/separator"
+import { X, Upload } from "lucide-react"
 
 interface VoiceAnalysisProps {
   onNext: (data: VoiceProfileData) => void;
@@ -28,22 +17,35 @@ interface VoiceAnalysisProps {
 interface VoiceProfileData {
   writingSamples: Array<{
     text: string;
-    type: string;
+    type: "blog" | "social" | "custom";
   }>;
   influencers: string[];
   writingStyle: {
-    formality: string;
-    complexity: string;
-    emotion: string;
+    formality: "casual" | "neutral" | "formal";
+    complexity: "simple" | "moderate" | "complex";
+    emotion: "neutral" | "passionate" | "empathetic";
   };
 }
 
-const SAMPLE_TYPES = ['blog', 'social', 'custom'];
+type SampleType = "blog" | "social" | "custom";
+const SAMPLE_TYPES: SampleType[] = ['blog', 'social', 'custom'];
 
 const WRITING_STYLES = {
-  formality: ['casual', 'neutral', 'formal'],
-  complexity: ['simple', 'moderate', 'complex'],
-  emotion: ['neutral', 'passionate', 'empathetic'],
+  formality: [
+    { value: 'casual', label: 'Casual and Relaxed' },
+    { value: 'neutral', label: 'Neutral and Balanced' },
+    { value: 'formal', label: 'Formal and Professional' },
+  ],
+  complexity: [
+    { value: 'simple', label: 'Simple and Clear' },
+    { value: 'moderate', label: 'Moderate' },
+    { value: 'complex', label: 'Complex and Sophisticated' },
+  ],
+  emotion: [
+    { value: 'neutral', label: 'Neutral and Objective' },
+    { value: 'passionate', label: 'Passionate and Energetic' },
+    { value: 'empathetic', label: 'Empathetic and Understanding' },
+  ],
 };
 
 const INFLUENCERS = [
@@ -61,21 +63,17 @@ const INFLUENCERS = [
 ];
 
 export default function VoiceAnalysis({ onNext, onBack, initialData }: VoiceAnalysisProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [voiceProfile, setVoiceProfile] = useState<VoiceProfileData>(initialData);
-  const [currentSample, setCurrentSample] = useState('');
-  const [sampleType, setSampleType] = useState<'blog' | 'social' | 'custom'>('blog');
+  const [newSample, setNewSample] = useState<{ text: string; type: SampleType }>({ text: '', type: 'blog' });
+  const [newInfluencer, setNewInfluencer] = useState('');
 
   const handleAddSample = () => {
-    if (currentSample.trim()) {
+    if (newSample.text.trim()) {
       setVoiceProfile(prev => ({
         ...prev,
-        writingSamples: [
-          ...prev.writingSamples,
-          { text: currentSample.trim(), type: sampleType },
-        ],
+        writingSamples: [...prev.writingSamples, { ...newSample, text: newSample.text.trim() }],
       }));
-      setCurrentSample('');
+      setNewSample({ text: '', type: 'blog' });
     }
   };
 
@@ -86,197 +84,172 @@ export default function VoiceAnalysis({ onNext, onBack, initialData }: VoiceAnal
     }));
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        setVoiceProfile(prev => ({
-          ...prev,
-          writingSamples: [
-            ...prev.writingSamples,
-            { text: text.slice(0, 1000), type: 'custom' },
-          ],
-        }));
-      };
-      reader.readAsText(file);
-    }
-  };
-
-  const handleInfluencersChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value as string[];
+  const handleInfluencerClick = (influencer: string) => {
     setVoiceProfile(prev => ({
       ...prev,
-      influencers: value,
+      influencers: prev.influencers.includes(influencer)
+        ? prev.influencers.filter(i => i !== influencer)
+        : [...prev.influencers, influencer],
     }));
   };
 
   const handleStyleChange = (
-    aspect: keyof VoiceProfileData['writingStyle'],
+    key: keyof VoiceProfileData['writingStyle'],
     value: string
   ) => {
     setVoiceProfile(prev => ({
       ...prev,
       writingStyle: {
         ...prev.writingStyle,
-        [aspect]: value,
+        [key]: value,
       },
     }));
   };
 
+  const isValid = () => {
+    return (
+      voiceProfile.writingSamples.length > 0 &&
+      voiceProfile.influencers.length > 0
+    );
+  };
+
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Voice Analysis
-      </Typography>
-
-      {/* Writing Samples Section */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Add writing samples that best represent your style
-        </Typography>
-        
-        <Stack spacing={2}>
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <FormControl sx={{ width: 200 }}>
-              <InputLabel>Sample Type</InputLabel>
-              <Select
-                value={sampleType}
-                label="Sample Type"
-                onChange={(e) => setSampleType(e.target.value as typeof sampleType)}
-              >
-                <MenuItem value="blog">Blog Post</MenuItem>
-                <MenuItem value="social">Social Media</MenuItem>
-                <MenuItem value="custom">Custom</MenuItem>
-              </Select>
-            </FormControl>
-            
-            <Button
-              component="label"
-              variant="outlined"
-              startIcon={<CloudUploadIcon />}
-              sx={{ height: 56 }}
-            >
-              Upload File
-              <input
-                type="file"
-                hidden
-                accept=".txt,.md"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Writing Samples</h3>
+          <div className="space-y-4">
+            <div className="grid gap-4">
+              <Textarea
+                value={newSample.text}
+                onChange={(e) => setNewSample({ ...newSample, text: e.target.value })}
+                placeholder="Enter a sample of your writing..."
+                className="min-h-[100px]"
               />
-            </Button>
-          </Box>
-
-          <TextField
-            fullWidth
-            multiline
-            rows={4}
-            variant="outlined"
-            placeholder="Paste or type your writing sample here..."
-            value={currentSample}
-            onChange={(e) => setCurrentSample(e.target.value)}
-          />
-          
-          <Button
-            variant="contained"
-            onClick={handleAddSample}
-            disabled={!currentSample.trim()}
-          >
-            Add Sample
-          </Button>
-        </Stack>
-
-        {/* Display Samples */}
-        <Stack spacing={2} sx={{ mt: 2 }}>
-          {voiceProfile.writingSamples.map((sample, index) => (
-            <Paper key={index} sx={{ p: 2, position: 'relative' }}>
-              <Box>
-                <Chip
-                  label={sample.type.toUpperCase()}
-                  size="small"
-                  sx={{ mr: 1 }}
+              <div className="flex gap-2">
+                <SelectEnhanced
+                  label="Sample Type"
+                  options={SAMPLE_TYPES.map(type => ({ value: type, label: type.charAt(0).toUpperCase() + type.slice(1) }))}
+                  value={newSample.type}
+                  onChange={(value) => setNewSample({ ...newSample, type: value as SampleType })}
+                  className="flex-1"
                 />
-                <Typography variant="body2" component="span">
-                  {sample.text.slice(0, 100)}...
-                </Typography>
-              </Box>
-              <IconButton
-                size="small"
-                onClick={() => handleRemoveSample(index)}
-                sx={{ position: 'absolute', top: 8, right: 8 }}
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Paper>
-          ))}
-        </Stack>
-      </Box>
+                <Button
+                  onClick={handleAddSample}
+                  disabled={!newSample.text.trim()}
+                  className="self-end"
+                >
+                  Add Sample
+                </Button>
+              </div>
+            </div>
 
-      <Divider sx={{ my: 3 }} />
+            <div className="space-y-2">
+              {voiceProfile.writingSamples.map((sample, index) => (
+                <div
+                  key={index}
+                  className="relative p-4 rounded-lg border bg-card"
+                >
+                  <Badge variant="secondary" className="mb-2">
+                    {sample.type.toUpperCase()}
+                  </Badge>
+                  <p className="text-sm text-card-foreground">
+                    {sample.text}
+                  </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2"
+                    onClick={() => handleRemoveSample(index)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Writing Style Preferences */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Writing Style Preferences
-        </Typography>
-        
-        <Stack spacing={2}>
-          <FormControl fullWidth>
-            <InputLabel>Formality Level</InputLabel>
-            <Select
-              value={voiceProfile.writingStyle.formality}
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Writing Style</h3>
+          <div className="space-y-4">
+            <SelectEnhanced
               label="Formality Level"
-              onChange={(e) => handleStyleChange('formality', e.target.value)}
-            >
-              <MenuItem value="casual">Casual</MenuItem>
-              <MenuItem value="neutral">Neutral</MenuItem>
-              <MenuItem value="formal">Formal</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth>
-            <InputLabel>Language Complexity</InputLabel>
-            <Select
-              value={voiceProfile.writingStyle.complexity}
+              options={WRITING_STYLES.formality}
+              value={voiceProfile.writingStyle.formality}
+              onChange={(value) => handleStyleChange('formality', value as VoiceProfileData['writingStyle']['formality'])}
+            />
+            <SelectEnhanced
               label="Language Complexity"
-              onChange={(e) => handleStyleChange('complexity', e.target.value)}
-            >
-              <MenuItem value="simple">Simple and Clear</MenuItem>
-              <MenuItem value="moderate">Moderate</MenuItem>
-              <MenuItem value="complex">Complex and Sophisticated</MenuItem>
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth>
-            <InputLabel>Emotional Tone</InputLabel>
-            <Select
-              value={voiceProfile.writingStyle.emotion}
+              options={WRITING_STYLES.complexity}
+              value={voiceProfile.writingStyle.complexity}
+              onChange={(value) => handleStyleChange('complexity', value as VoiceProfileData['writingStyle']['complexity'])}
+            />
+            <SelectEnhanced
               label="Emotional Tone"
-              onChange={(e) => handleStyleChange('emotion', e.target.value)}
-            >
-              <MenuItem value="neutral">Neutral and Balanced</MenuItem>
-              <MenuItem value="passionate">Passionate and Energetic</MenuItem>
-              <MenuItem value="empathetic">Empathetic and Understanding</MenuItem>
-            </Select>
-          </FormControl>
-        </Stack>
-      </Box>
+              options={WRITING_STYLES.emotion}
+              value={voiceProfile.writingStyle.emotion}
+              onChange={(value) => handleStyleChange('emotion', value as VoiceProfileData['writingStyle']['emotion'])}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* Navigation */}
-      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-        <Button onClick={onBack}>
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Influencers</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Select content creators or thought leaders whose writing style you admire
+          </p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {INFLUENCERS.map((influencer) => (
+              <Badge
+                key={influencer}
+                variant={voiceProfile.influencers.includes(influencer) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => handleInfluencerClick(influencer)}
+              >
+                {influencer}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={newInfluencer}
+              onChange={(e) => setNewInfluencer(e.target.value)}
+              placeholder="Add custom influencer"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newInfluencer.trim()) {
+                  handleInfluencerClick(newInfluencer.trim());
+                  setNewInfluencer('');
+                }
+              }}
+            />
+            <Button
+              onClick={() => {
+                if (newInfluencer.trim()) {
+                  handleInfluencerClick(newInfluencer.trim());
+                  setNewInfluencer('');
+                }
+              }}
+              variant="outline"
+            >
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between pt-4">
+        <Button variant="outline" onClick={onBack}>
           Back
         </Button>
-        <Button
-          variant="contained"
-          onClick={() => onNext(voiceProfile)}
-          color="primary"
-        >
+        <Button onClick={() => onNext(voiceProfile)} disabled={!isValid()}>
           Next
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 } 

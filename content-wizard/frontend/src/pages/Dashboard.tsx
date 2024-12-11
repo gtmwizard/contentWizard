@@ -1,23 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Box,
-  Typography,
-  Button,
-  Paper,
-  Grid,
-  Chip,
-  CircularProgress,
-  Card,
-  CardContent,
-  CardActions,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import ArticleIcon from '@mui/icons-material/Article';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import TwitterIcon from '@mui/icons-material/Twitter';
+import { PlusCircle, FileText, Linkedin, Twitter, ChevronRight } from "lucide-react";
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 interface Content {
   id: string;
@@ -57,26 +46,26 @@ export default function Dashboard() {
   const getContentIcon = (type: string) => {
     switch (type) {
       case 'blog':
-        return <ArticleIcon />;
+        return <FileText className="h-4 w-4" />;
       case 'linkedin':
-        return <LinkedInIcon />;
+        return <Linkedin className="h-4 w-4" />;
       case 'twitter':
-        return <TwitterIcon />;
+        return <Twitter className="h-4 w-4" />;
       default:
-        return <ArticleIcon />;
+        return <FileText className="h-4 w-4" />;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeVariant = (status: string): "default" | "secondary" | "outline" => {
     switch (status) {
       case 'published':
-        return 'success';
-      case 'draft':
-        return 'warning';
-      case 'scheduled':
-        return 'info';
-      default:
         return 'default';
+      case 'draft':
+        return 'secondary';
+      case 'scheduled':
+        return 'outline';
+      default:
+        return 'secondary';
     }
   };
 
@@ -90,108 +79,88 @@ export default function Dashboard() {
 
   return (
     <DashboardLayout>
-      <Box sx={{ p: 4 }}>
+      <div className="p-6">
         {/* Welcome Section */}
-        <Paper
-          sx={{
-            p: 4,
-            mb: 4,
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            color: 'white',
-          }}
-        >
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={8}>
-              <Typography variant="h4" gutterBottom>
-                Welcome to Content Wizard
-              </Typography>
-              <Typography variant="subtitle1" sx={{ mb: 2 }}>
-                Create engaging content for your audience with AI-powered assistance.
-              </Typography>
-              <Button
-                variant="contained"
-                size="large"
-                startIcon={<AddIcon />}
-                onClick={() => navigate('/dashboard/create')}
-                sx={{
-                  bgcolor: 'white',
-                  color: 'primary.main',
-                  '&:hover': {
-                    bgcolor: 'grey.100',
-                  },
-                }}
-              >
-                Create New Content
-              </Button>
-            </Grid>
-          </Grid>
-        </Paper>
+        <div className="rounded-lg bg-gradient-to-r from-gray-700 to-gray-800 p-6 mb-6 text-white">
+          <div className="max-w-3xl">
+            <h1 className="text-3xl font-bold mb-2">
+              Welcome to Content Wizard
+            </h1>
+            <p className="text-lg mb-4 text-gray-200">
+              Create engaging content for your audience with AI-powered assistance.
+            </p>
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => navigate('/dashboard/create')}
+              className="bg-white text-gray-900 hover:bg-gray-100"
+            >
+              <PlusCircle className="mr-2 h-4 w-4" /> Create New Content
+            </Button>
+          </div>
+        </div>
 
         {/* Recent Content */}
-        <Typography variant="h5" sx={{ mb: 3 }}>
-          Recent Content
-        </Typography>
+        <h2 className="text-2xl font-semibold mb-4">Recent Content</h2>
 
         {isLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-            <CircularProgress />
-          </Box>
+          <div className="flex justify-center items-center p-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-white"></div>
+          </div>
         ) : contents.length > 0 ? (
-          <Grid container spacing={3}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {contents.map((content) => (
-              <Grid item xs={12} md={6} lg={4} key={content.id}>
-                <Card>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+              <Card key={content.id} className="flex flex-col">
+                <CardContent className="flex-grow p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2">
                       {getContentIcon(content.type)}
-                      <Typography variant="subtitle2" sx={{ ml: 1 }}>
-                        {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
-                      </Typography>
-                      <Box sx={{ flexGrow: 1 }} />
-                      <Chip
-                        label={content.status}
-                        size="small"
-                        color={getStatusColor(content.status) as any}
-                      />
-                    </Box>
-                    <Typography variant="h6" gutterBottom>
-                      {content.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                      {content.content.substring(0, 100)}...
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Created on {formatDate(content.createdAt)}
-                    </Typography>
-                  </CardContent>
-                  <CardActions>
-                    <Button
-                      size="small"
-                      onClick={() => navigate(`/dashboard/content/${content.id}`)}
-                    >
-                      View Details
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Grid>
+                      <span className="text-sm font-medium capitalize">
+                        {content.type}
+                      </span>
+                    </div>
+                    <Badge variant={getStatusBadgeVariant(content.status)}>
+                      {content.status}
+                    </Badge>
+                  </div>
+                  <h3 className="font-semibold mb-2">{content.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {content.content.substring(0, 100)}...
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Created on {formatDate(content.createdAt)}
+                  </p>
+                </CardContent>
+                <Separator />
+                <CardFooter className="p-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/dashboard/content/${content.id}`)}
+                    className="w-full"
+                  >
+                    View Details <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardFooter>
+              </Card>
             ))}
-          </Grid>
+          </div>
         ) : (
-          <Paper sx={{ p: 4, textAlign: 'center' }}>
-            <Typography color="text.secondary" gutterBottom>
-              No content yet
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => navigate('/dashboard/create')}
-              sx={{ mt: 2 }}
-            >
-              Create Your First Content
-            </Button>
-          </Paper>
+          <Card className="p-6 text-center">
+            <CardContent>
+              <p className="text-muted-foreground mb-4">
+                No content yet
+              </p>
+              <Button
+                variant="default"
+                onClick={() => navigate('/dashboard/create')}
+              >
+                <PlusCircle className="mr-2 h-4 w-4" /> Create Your First Content
+              </Button>
+            </CardContent>
+          </Card>
         )}
-      </Box>
+      </div>
     </DashboardLayout>
   );
 } 

@@ -15,6 +15,7 @@ interface AuthContextType {
   isLoading: boolean;
   error: string | null;
   checkOnboardingStatus: () => Promise<boolean>;
+  updateProfile: (data: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,6 +72,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
       return false;
+    }
+  };
+
+  const updateProfile = async (data: any) => {
+    if (!token || !user) throw new Error('Not authenticated');
+
+    try {
+      const response = await fetch('http://localhost:3001/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      const updatedUser = { ...user, ...data };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update profile');
+      throw err;
     }
   };
 
@@ -150,7 +177,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout, 
       isLoading, 
       error,
-      checkOnboardingStatus 
+      checkOnboardingStatus,
+      updateProfile
     }}>
       {children}
     </AuthContext.Provider>

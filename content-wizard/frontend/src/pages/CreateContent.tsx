@@ -1,23 +1,21 @@
 import { useState } from 'react';
-import {
-  Box,
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Chip,
-  Button,
-  CircularProgress,
-  Alert,
-  Stack,
-  Divider,
-} from '@mui/material';
+import { Loader2, Plus } from "lucide-react";
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface GenerationSettings {
   type: 'blog' | 'linkedin' | 'twitter';
@@ -113,134 +111,137 @@ export default function CreateContent() {
 
   return (
     <DashboardLayout>
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Create Content
-        </Typography>
+      <div className="container py-6">
+        <h1 className="text-3xl font-bold mb-6">Create Content</h1>
 
-        <Box sx={{ display: 'flex', gap: 3, mt: 3 }}>
+        <div className="flex gap-6">
           {/* Settings Panel */}
-          <Paper sx={{ p: 3, width: '35%' }}>
-            <Stack spacing={3}>
-              <Typography variant="h6" gutterBottom>
-                Generation Settings
-              </Typography>
+          <Card className="p-6 w-[35%]">
+            <div className="space-y-6">
+              <h2 className="text-xl font-semibold">Generation Settings</h2>
 
-              <TextField
-                fullWidth
-                label="Topic"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                required
-                helperText="What would you like to write about?"
-              />
+              <div className="space-y-2">
+                <Label htmlFor="topic">Topic</Label>
+                <Input
+                  id="topic"
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  placeholder="What would you like to write about?"
+                />
+              </div>
 
-              <FormControl fullWidth required>
-                <InputLabel>Content Type</InputLabel>
+              <div className="space-y-2">
+                <Label>Content Type</Label>
                 <Select
                   value={settings.type}
-                  label="Content Type"
-                  onChange={(e) => setSettings(prev => ({ ...prev, type: e.target.value as any }))}
+                  onValueChange={(value) => setSettings(prev => ({ ...prev, type: value as any }))}
                 >
-                  {CONTENT_TYPES.map((type) => (
-                    <MenuItem key={type.value} value={type.value}>
-                      {type.label}
-                    </MenuItem>
-                  ))}
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select content type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CONTENT_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {type.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-              </FormControl>
+              </div>
 
-              <FormControl fullWidth required>
-                <InputLabel>Tone</InputLabel>
+              <div className="space-y-2">
+                <Label>Tone</Label>
                 <Select
                   value={settings.tone}
-                  label="Tone"
-                  onChange={(e) => setSettings(prev => ({ ...prev, tone: e.target.value }))}
+                  onValueChange={(value) => setSettings(prev => ({ ...prev, tone: value }))}
                 >
-                  {TONES.map((tone) => (
-                    <MenuItem key={tone} value={tone}>
-                      {tone}
-                    </MenuItem>
-                  ))}
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select tone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TONES.map((tone) => (
+                      <SelectItem key={tone} value={tone}>
+                        {tone}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
-              </FormControl>
+              </div>
 
               {settings.type === 'blog' && (
-                <TextField
-                  fullWidth
-                  type="number"
-                  label="Length (words)"
-                  value={settings.length}
-                  onChange={(e) => setSettings(prev => ({ ...prev, length: parseInt(e.target.value) }))}
-                  InputProps={{ inputProps: { min: 100, max: 2000 } }}
-                />
+                <div className="space-y-2">
+                  <Label htmlFor="length">Length (words)</Label>
+                  <Input
+                    id="length"
+                    type="number"
+                    value={settings.length}
+                    onChange={(e) => setSettings(prev => ({ ...prev, length: parseInt(e.target.value) }))}
+                    min={100}
+                    max={2000}
+                  />
+                </div>
               )}
 
-              <Box>
-                <TextField
-                  fullWidth
-                  label="Keywords"
+              <div className="space-y-2">
+                <Label htmlFor="keywords">Keywords</Label>
+                <Input
+                  id="keywords"
                   value={currentKeyword}
                   onChange={(e) => setCurrentKeyword(e.target.value)}
                   onKeyPress={handleKeywordAdd}
-                  helperText="Press Enter to add keywords"
+                  placeholder="Press Enter to add keywords"
                 />
-                <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                <div className="flex flex-wrap gap-2 mt-2">
                   {settings.keywords.map((keyword) => (
-                    <Chip
+                    <Badge
                       key={keyword}
-                      label={keyword}
-                      onDelete={() => handleKeywordDelete(keyword)}
-                    />
+                      variant="secondary"
+                      className="cursor-pointer"
+                      onClick={() => handleKeywordDelete(keyword)}
+                    >
+                      {keyword}
+                      <Plus className="w-3 h-3 ml-1 rotate-45" />
+                    </Badge>
                   ))}
-                </Box>
-              </Box>
+                </div>
+              </div>
 
               <Button
-                variant="contained"
+                className="w-full"
                 onClick={handleGenerate}
                 disabled={isGenerating || !topic}
-                startIcon={isGenerating ? <CircularProgress size={20} /> : null}
               >
+                {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isGenerating ? 'Generating...' : 'Generate Content'}
               </Button>
 
               {error && (
-                <Alert severity="error">
-                  {error}
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
                 </Alert>
               )}
-            </Stack>
-          </Paper>
+            </div>
+          </Card>
 
           {/* Content Preview */}
-          <Paper sx={{ p: 3, width: '65%' }}>
-            <Typography variant="h6" gutterBottom>
-              Generated Content
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
+          <Card className="p-6 w-[65%]">
+            <h2 className="text-xl font-semibold mb-4">Generated Content</h2>
+            <Separator className="mb-4" />
             
             {generatedContent ? (
-              <Box sx={{ whiteSpace: 'pre-wrap' }}>
+              <div className="whitespace-pre-wrap">
                 {generatedContent}
-              </Box>
+              </div>
             ) : (
-              <Box sx={{ 
-                height: '400px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                bgcolor: 'grey.100',
-                borderRadius: 1,
-              }}>
-                <Typography color="text.secondary">
+              <div className="h-[400px] flex items-center justify-center bg-muted rounded-md">
+                <span className="text-muted-foreground">
                   Generated content will appear here
-                </Typography>
-              </Box>
+                </span>
+              </div>
             )}
-          </Paper>
-        </Box>
-      </Container>
+          </Card>
+        </div>
+      </div>
     </DashboardLayout>
   );
 } 

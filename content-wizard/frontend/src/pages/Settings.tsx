@@ -1,19 +1,11 @@
 import { useState } from 'react';
-import {
-  Box,
-  Container,
-  Paper,
-  Typography,
-  TextField,
-  Button,
-  Alert,
-  Divider,
-  IconButton,
-  InputAdornment,
-} from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
-import DashboardLayout from '../components/layout/DashboardLayout';
 import { useAuth } from '../contexts/AuthContext';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function Settings() {
   const { token } = useAuth();
@@ -58,82 +50,83 @@ export default function Settings() {
 
   return (
     <DashboardLayout>
-      <Container maxWidth="md" sx={{ py: 4 }}>
-        <Typography variant="h4" gutterBottom>
-          Settings
-        </Typography>
+      <div className="container max-w-4xl py-6">
+        <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
-        <Paper sx={{ p: 4, mt: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            API Configuration
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Configure your API keys for content generation and other services.
-          </Typography>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold">API Configuration</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Configure your API keys for content generation and other services.
+                </p>
+              </div>
 
-          <Divider sx={{ my: 3 }} />
-
-          <Box sx={{ maxWidth: 'sm' }}>
-            <Typography variant="subtitle1" gutterBottom>
-              OpenAI API Key
-            </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Your OpenAI API key is required for AI-powered content generation.
-              You can get your API key from the{' '}
-              <a
-                href="https://platform.openai.com/api-keys"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: 'inherit' }}
-              >
-                OpenAI dashboard
-              </a>
-              .
-            </Typography>
-
-            <TextField
-              fullWidth
-              type={showKey ? 'text' : 'password'}
-              value={openAIKey}
-              onChange={(e) => setOpenAIKey(e.target.value)}
-              placeholder="sk-..."
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowKey(!showKey)}
-                      edge="end"
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-1.5">OpenAI API Key</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Your OpenAI API key is required for AI-powered content generation.
+                    You can get your API key from the{' '}
+                    <a
+                      href="https://platform.openai.com/api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
                     >
-                      {showKey ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ mb: 2 }}
-            />
+                      OpenAI dashboard
+                    </a>
+                    .
+                  </p>
 
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Input
+                        type={showKey ? 'text' : 'password'}
+                        value={openAIKey}
+                        onChange={(e) => setOpenAIKey(e.target.value)}
+                        placeholder="sk-..."
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowKey(!showKey)}
+                      >
+                        {showKey ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <Button
+                      onClick={handleSaveAPIKey}
+                      disabled={!openAIKey || isSaving}
+                    >
+                      {isSaving ? 'Saving...' : 'Save API Key'}
+                    </Button>
+                  </div>
 
-            {success && (
-              <Alert severity="success" sx={{ mb: 2 }}>
-                {success}
-              </Alert>
-            )}
+                  {error && (
+                    <Alert variant="destructive" className="mt-4">
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
 
-            <Button
-              variant="contained"
-              onClick={handleSaveAPIKey}
-              disabled={!openAIKey || isSaving}
-            >
-              {isSaving ? 'Saving...' : 'Save API Key'}
-            </Button>
-          </Box>
-        </Paper>
-      </Container>
+                  {success && (
+                    <Alert className="mt-4">
+                      <AlertDescription>{success}</AlertDescription>
+                    </Alert>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </DashboardLayout>
   );
 } 

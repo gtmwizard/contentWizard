@@ -1,15 +1,11 @@
 import { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
-  Chip,
-  TextField,
-  Paper,
-} from '@mui/material';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Label } from "@/components/ui/label"
+import { X } from "lucide-react"
 
 interface ContentPreferencesProps {
   onNext: (data: ContentPreferencesData) => void;
@@ -68,15 +64,15 @@ const SUGGESTED_GOALS = [
 export default function ContentPreferences({ onNext, onBack, initialData }: ContentPreferencesProps) {
   const [preferences, setPreferences] = useState<ContentPreferencesData>(initialData);
   const [newTopic, setNewTopic] = useState('');
+  const [newTone, setNewTone] = useState('');
   const [newGoal, setNewGoal] = useState('');
 
-  const handleContentTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = event.target;
+  const handleContentTypeChange = (type: keyof ContentPreferencesData['contentTypes']) => {
     setPreferences(prev => ({
       ...prev,
       contentTypes: {
         ...prev.contentTypes,
-        [name]: checked,
+        [type]: !prev.contentTypes[type],
       },
     }));
   };
@@ -118,6 +114,16 @@ export default function ContentPreferences({ onNext, onBack, initialData }: Cont
     }
   };
 
+  const addCustomTone = () => {
+    if (newTone.trim() && !preferences.tones.includes(newTone.trim())) {
+      setPreferences(prev => ({
+        ...prev,
+        tones: [...prev.tones, newTone.trim()],
+      }));
+      setNewTone('');
+    }
+  };
+
   const addCustomGoal = () => {
     if (newGoal.trim() && !preferences.goals.includes(newGoal.trim())) {
       setPreferences(prev => ({
@@ -138,136 +144,140 @@ export default function ContentPreferences({ onNext, onBack, initialData }: Cont
   };
 
   return (
-    <Box>
-      <Typography variant="h6" gutterBottom>
-        Content Preferences
-      </Typography>
-
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Content Types
-        </Typography>
-        <FormGroup>
-          <FormControlLabel
-            control={
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Content Types</h3>
+          <div className="grid gap-4">
+            <div className="flex items-center space-x-2">
               <Checkbox
+                id="blog"
                 checked={preferences.contentTypes.blog}
-                onChange={handleContentTypeChange}
-                name="blog"
+                onCheckedChange={() => handleContentTypeChange('blog')}
               />
-            }
-            label="Blog Posts"
-          />
-          <FormControlLabel
-            control={
+              <Label htmlFor="blog">Blog Posts</Label>
+            </div>
+            <div className="flex items-center space-x-2">
               <Checkbox
+                id="linkedin"
                 checked={preferences.contentTypes.linkedin}
-                onChange={handleContentTypeChange}
-                name="linkedin"
+                onCheckedChange={() => handleContentTypeChange('linkedin')}
               />
-            }
-            label="LinkedIn Posts"
-          />
-          <FormControlLabel
-            control={
+              <Label htmlFor="linkedin">LinkedIn Posts</Label>
+            </div>
+            <div className="flex items-center space-x-2">
               <Checkbox
+                id="twitter"
                 checked={preferences.contentTypes.twitter}
-                onChange={handleContentTypeChange}
-                name="twitter"
+                onCheckedChange={() => handleContentTypeChange('twitter')}
               />
-            }
-            label="Twitter/X Posts"
-          />
-        </FormGroup>
-      </Paper>
+              <Label htmlFor="twitter">Twitter/X Posts</Label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Content Topics
-        </Typography>
-        <Box sx={{ mb: 2 }}>
-          {SUGGESTED_TOPICS.map((topic) => (
-            <Chip
-              key={topic}
-              label={topic}
-              onClick={() => handleTopicClick(topic)}
-              color={preferences.topics.includes(topic) ? 'primary' : 'default'}
-              sx={{ m: 0.5 }}
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Content Topics</h3>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {SUGGESTED_TOPICS.map((topic) => (
+              <Badge
+                key={topic}
+                variant={preferences.topics.includes(topic) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => handleTopicClick(topic)}
+              >
+                {topic}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={newTopic}
+              onChange={(e) => setNewTopic(e.target.value)}
+              placeholder="Add custom topic"
+              onKeyDown={(e) => e.key === 'Enter' && addCustomTopic()}
             />
-          ))}
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <TextField
-            size="small"
-            value={newTopic}
-            onChange={(e) => setNewTopic(e.target.value)}
-            placeholder="Add custom topic"
-            onKeyPress={(e) => e.key === 'Enter' && addCustomTopic()}
-          />
-          <Button onClick={addCustomTopic} variant="outlined" size="small">
-            Add
-          </Button>
-        </Box>
-      </Paper>
+            <Button onClick={addCustomTopic} variant="outline" size="sm">
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Content Tone
-        </Typography>
-        <Box>
-          {SUGGESTED_TONES.map((tone) => (
-            <Chip
-              key={tone}
-              label={tone}
-              onClick={() => handleToneClick(tone)}
-              color={preferences.tones.includes(tone) ? 'primary' : 'default'}
-              sx={{ m: 0.5 }}
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Content Tone</h3>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {SUGGESTED_TONES.map((tone) => (
+              <Badge
+                key={tone}
+                variant={preferences.tones.includes(tone) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => handleToneClick(tone)}
+              >
+                {tone}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={newTone}
+              onChange={(e) => setNewTone(e.target.value)}
+              placeholder="Add custom tone"
+              onKeyDown={(e) => e.key === 'Enter' && addCustomTone()}
             />
-          ))}
-        </Box>
-      </Paper>
+            <Button onClick={addCustomTone} variant="outline" size="sm">
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          Content Goals
-        </Typography>
-        <Box sx={{ mb: 2 }}>
-          {SUGGESTED_GOALS.map((goal) => (
-            <Chip
-              key={goal}
-              label={goal}
-              onClick={() => handleGoalClick(goal)}
-              color={preferences.goals.includes(goal) ? 'primary' : 'default'}
-              sx={{ m: 0.5 }}
+      <Card>
+        <CardContent className="pt-6">
+          <h3 className="text-lg font-semibold mb-4">Content Goals</h3>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {SUGGESTED_GOALS.map((goal) => (
+              <Badge
+                key={goal}
+                variant={preferences.goals.includes(goal) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => handleGoalClick(goal)}
+              >
+                {goal}
+              </Badge>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <Input
+              value={newGoal}
+              onChange={(e) => setNewGoal(e.target.value)}
+              placeholder="Add custom goal"
+              onKeyDown={(e) => e.key === 'Enter' && addCustomGoal()}
             />
-          ))}
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <TextField
-            size="small"
-            value={newGoal}
-            onChange={(e) => setNewGoal(e.target.value)}
-            placeholder="Add custom goal"
-            onKeyPress={(e) => e.key === 'Enter' && addCustomGoal()}
-          />
-          <Button onClick={addCustomGoal} variant="outlined" size="small">
-            Add
-          </Button>
-        </Box>
-      </Paper>
+            <Button onClick={addCustomGoal} variant="outline" size="sm">
+              Add
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'space-between' }}>
-        <Button onClick={onBack}>
+      <div className="flex justify-between pt-4">
+        <Button
+          variant="outline"
+          onClick={onBack}
+        >
           Back
         </Button>
         <Button
-          variant="contained"
           onClick={() => onNext(preferences)}
           disabled={!isValid()}
         >
           Next
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 } 

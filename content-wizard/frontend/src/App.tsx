@@ -1,38 +1,12 @@
-import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import CreateContent from './pages/CreateContent';
 import Settings from './pages/Settings';
-
-const theme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#2196f3',
-    },
-    secondary: {
-      main: '#f50057',
-    },
-  },
-  typography: {
-    h4: {
-      fontWeight: 600,
-    },
-  },
-  components: {
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 12,
-        },
-      },
-    },
-  },
-});
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
@@ -61,10 +35,9 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <AuthProvider>
-        <Router>
+    <ThemeProvider defaultTheme="system" storageKey="ui-theme">
+      <Router>
+        <AuthProvider>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -77,23 +50,33 @@ function App() {
               }
             />
             <Route
-              path="/dashboard/*"
+              path="/dashboard"
               element={
                 <PrivateRoute>
-                  <Routes>
-                    <Route index element={<Dashboard />} />
-                    <Route path="create" element={<CreateContent />} />
-                    <Route path="schedule" element={<div>Schedule</div>} />
-                    <Route path="settings" element={<Settings />} />
-                    <Route path="content/:id" element={<div>Content Details</div>} />
-                  </Routes>
+                  <Dashboard />
                 </PrivateRoute>
               }
             />
-            <Route path="/" element={<Navigate to="/login" />} />
+            <Route
+              path="/dashboard/create"
+              element={
+                <PrivateRoute>
+                  <CreateContent />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/dashboard/settings"
+              element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
           </Routes>
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }

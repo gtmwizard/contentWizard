@@ -1,15 +1,14 @@
 import { useState } from 'react';
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
-  Box,
-  TextField,
-  Button,
-  FormControl,
-  InputLabel,
   Select,
-  MenuItem,
-  Typography,
-  SelectChangeEvent,
-} from '@mui/material';
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Textarea } from "@/components/ui/textarea"
 
 interface BusinessDetailsProps {
   onNext: (data: BusinessDetailsData) => void;
@@ -41,28 +40,12 @@ const INDUSTRIES = [
 export default function BusinessDetails({ onNext, initialData }: BusinessDetailsProps) {
   const [formData, setFormData] = useState<BusinessDetailsData>(initialData);
 
-  const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectChange = (e: SelectChangeEvent) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onNext(formData);
   };
 
-  const isFormValid = () => {
+  const isValid = () => {
     return (
       formData.businessName.trim() !== '' &&
       formData.industry !== '' &&
@@ -72,75 +55,82 @@ export default function BusinessDetails({ onNext, initialData }: BusinessDetails
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Tell us about your business
-      </Typography>
-      
-      <TextField
-        fullWidth
-        label="Business Name"
-        name="businessName"
-        value={formData.businessName}
-        onChange={handleTextChange}
-        margin="normal"
-        required
-        helperText="Enter your company or brand name"
-      />
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <label htmlFor="businessName" className="text-sm font-medium">
+          Business Name
+        </label>
+        <Input
+          id="businessName"
+          value={formData.businessName}
+          onChange={(e) =>
+            setFormData({ ...formData, businessName: e.target.value })
+          }
+          placeholder="Enter your business name"
+          required
+        />
+      </div>
 
-      <FormControl fullWidth margin="normal" required>
-        <InputLabel>Industry</InputLabel>
+      <div className="space-y-2">
+        <label htmlFor="industry" className="text-sm font-medium">
+          Industry
+        </label>
         <Select
-          name="industry"
           value={formData.industry}
-          label="Industry"
-          onChange={handleSelectChange}
+          onValueChange={(value) =>
+            setFormData({ ...formData, industry: value })
+          }
+          required
         >
-          {INDUSTRIES.map((industry) => (
-            <MenuItem key={industry} value={industry}>
-              {industry}
-            </MenuItem>
-          ))}
+          <SelectTrigger>
+            <SelectValue placeholder="Select your industry" />
+          </SelectTrigger>
+          <SelectContent>
+            {INDUSTRIES.map((industry) => (
+              <SelectItem key={industry} value={industry}>
+                {industry}
+              </SelectItem>
+            ))}
+          </SelectContent>
         </Select>
-      </FormControl>
+      </div>
 
-      <TextField
-        fullWidth
-        label="Target Audience"
-        name="targetAudience"
-        value={formData.targetAudience}
-        onChange={handleTextChange}
-        margin="normal"
-        required
-        multiline
-        rows={2}
-        helperText="Describe your ideal customer or audience (e.g., 'Small business owners in the tech industry')"
-      />
+      <div className="space-y-2">
+        <label htmlFor="targetAudience" className="text-sm font-medium">
+          Target Audience
+        </label>
+        <Input
+          id="targetAudience"
+          value={formData.targetAudience}
+          onChange={(e) =>
+            setFormData({ ...formData, targetAudience: e.target.value })
+          }
+          placeholder="Describe your target audience"
+          required
+        />
+      </div>
 
-      <TextField
-        fullWidth
-        label="Business Description"
-        name="description"
-        value={formData.description}
-        onChange={handleTextChange}
-        margin="normal"
-        required
-        multiline
-        rows={4}
-        helperText="Provide a brief description of what your business does and its unique value proposition"
-      />
+      <div className="space-y-2">
+        <label htmlFor="description" className="text-sm font-medium">
+          Business Description
+        </label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
+          placeholder="Describe what your business does"
+          className="min-h-[100px]"
+          required
+        />
+      </div>
 
-      <Box sx={{ mt: 4, display: 'flex', justifyContent: 'flex-end' }}>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          size="large"
-          disabled={!isFormValid()}
-        >
+      <div className="flex justify-end pt-4">
+        <Button type="submit" disabled={!isValid()}>
           Next
         </Button>
-      </Box>
-    </Box>
+      </div>
+    </form>
   );
 } 
