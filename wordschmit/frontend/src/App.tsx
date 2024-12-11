@@ -9,6 +9,7 @@ import CreateContent from './pages/CreateContent';
 import Settings from './pages/Settings';
 import { ScheduleTest } from '@/components/content/ScheduleTest';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { StatusCheck } from '@/components/ui/status-check';
 
 function ErrorBoundary() {
   const error = useRouteError();
@@ -113,6 +114,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="ui-theme">
       <RouterProvider router={router} />
+      <StatusCheck />
     </ThemeProvider>
   );
 }
